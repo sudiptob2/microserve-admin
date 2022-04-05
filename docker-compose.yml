@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: 'python manage.py runserver 0.0.0.0:8000'
+    command: 'bash scripts/backend_entrypoint.sh'
     env_file:
       - .env
     ports:
@@ -25,6 +25,20 @@ services:
       - pg-data:/var/lib/mysql
     ports:
       - "5437:5432"
+    networks:
+      - main
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    command: 'python -u consumer.py'
+    depends_on:
+      - db
+    restart: unless-stopped
     networks:
       - main
 
