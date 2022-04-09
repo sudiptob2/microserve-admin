@@ -39,7 +39,7 @@ services:
     command: 'python -u consumer.py'
     depends_on:
       - db
-    restart: unless-stopped
+    restart: always
     networks:
       - main
 
