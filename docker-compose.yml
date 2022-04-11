@@ -5,6 +5,9 @@ services:
       context: .
       dockerfile: Dockerfile
     command: 'bash scripts/backend_entrypoint.sh'
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - .env
     ports:
@@ -34,6 +37,8 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - .:/app
     command: 'python -u consumer.py'
@@ -42,6 +47,17 @@ services:
     restart: always
     networks:
       - main
+
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:3.10.0-rc.3-management
+    env_file: .env
+    ports:
+      - "5675:5672" # we forward this port because it's useful for debugging
+      - "15675:15672" # here, we can access rabbitmq management plugin
+    networks:
+      - main
+
 
 volumes:
   pg-data:

@@ -5,13 +5,23 @@ import pika
 
 RABBIT_ENDPOINT = os.environ['RABBIT_ENDPOINT']
 
-params = pika.URLParameters(RABBIT_ENDPOINT)
 
-connection = pika.BlockingConnection(params)
+class Producer:
+    """Implement the producer logic."""
 
-channel = connection.channel()
+    def __init__(self):
+        self.params = pika.URLParameters(RABBIT_ENDPOINT)
+        self.connection = pika.BlockingConnection(self.params)
 
-
-def publish(method, body):
-    properties = pika.BasicProperties(method)
-    channel.basic_publish(exchange='', routing_key='main', body=json.dumps(body), properties=properties)
+    def publish(self, method, body):
+        properties = pika.BasicProperties(method)
+        if not self.connection or self.connection.is_closed:
+            self.connection = pika.BlockingConnection(self.params)
+        channel = self.connection.channel()
+        channel.basic_publish(
+            exchange='',
+            routing_key='main',
+            body=json.dumps(body),
+            properties=properties,
+        )
+        print('Product published in queue: MAIN')
